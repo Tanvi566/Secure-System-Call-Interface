@@ -1,0 +1,57 @@
+2026-03-25 23:47:44.621807 - Chhavi: Executed 'ls'
+2026-03-25 23:53:44.733894 - Ishan: Executed 'ls'
+2026-03-25 23:54:51.354874 - Ishan: Executed 'ls'
+2026-03-25 23:54:51.825019 - Ishan: Executed 'ls'
+2026-03-25 23:54:52.182601 - Ishan: Executed 'ls'
+2026-03-25 23:54:52.384197 - Ishan: Executed 'ls'
+2026-03-25 23:54:52.511259 - Ishan: Executed 'ls'
+2026-03-25 23:54:52.638787 - Ishan: Executed 'ls'
+2026-03-25 23:54:52.764617 - Ishan: Executed 'ls'
+2026-03-25 23:54:52.892586 - Ishan: Executed 'ls'
+2026-03-25 23:54:53.037374 - Ishan: Executed 'ls'
+2026-03-25 23:54:53.164503 - Ishan: Executed 'ls'
+2026-03-25 23:54:57.412302 - Ishan: User manually logged out
+2026-03-26 11:47:20.263673 - Ishan: User manually logged out
+2026-03-26 11:49:28.303638 - Ishan: Created folder HelloWorld
+2026-03-26 11:49:46.816398 - Ishan: Created file cd HelloWorld
+2026-03-26 11:49:50.519326 - Ishan: Executed 'ls'
+2026-03-26 11:54:02.040055 - Ishan: Executed 'ls'
+2026-03-26 11:54:41.969067 - Ishan: Moved into directory HelloWorld
+2026-03-26 11:54:47.119754 - Ishan: Executed 'ls'
+2026-03-26 11:54:56.220025 - Ishan: Created file Filenew.txt
+2026-03-26 11:55:19.402214 - Ishan: Wrote file Filenew.txt
+2026-03-26 11:55:28.251795 - Ishan: Read file Filenew.txt
+2026-03-26 11:55:56.551320 - Ishan: User manually logged out
+2026-03-26 11:56:51.037312 - admin: Executed 'ls'
+2026-03-26 12:03:42.175893 - Ishan: User manually logged out
+2026-03-26 12:04:01.999837 - admin: Executed 'ls'
+2026-03-26 12:06:44.894467 - admin: Auto-logged out due to inactivity
+2026-03-26 12:12:00.114081 - admin: Executed 'ls'
+2026-03-26 12:12:09.982525 - admin: Deleted folder newone
+2026-03-26 12:12:14.030404 - admin: Executed 'ls'
+2026-03-26 12:12:19.909108 - admin: User manually logged out
+2026-03-26 12:16:24.157730 - Ishan: User logged out
+2026-03-26 12:21:06.556735 - Ishan: Created file Hello
+2026-03-26 12:21:10.789571 - Ishan: User logged out
+2026-03-26 12:21:27.784599 - admin: Deleted file Hello
+2026-03-26 12:21:59.972178 - admin: Created folder DIRECTORY1
+2026-03-26 12:25:05.656649 - Ishan: Executed 'pwd'
+2026-03-26 12:25:20.159146 - Ishan: Executed 'ls'
+2026-03-26 12:25:31.682603 - Ishan: Moved into directory DIRECTORY1
+2026-03-26 12:27:32.205829 - Ishan: Auto-logged out due to inactivity
+2026-03-26 12:27:36.766233 - Ishan: User logged out
+2026-03-26 12:31:03.462688 - Ishan: Created folder dir1
+2026-03-26 12:31:14.896360 - Ishan: Created file file1.txt
+2026-03-26 12:31:29.549603 - Ishan: Created folder dir2
+2026-03-26 12:31:44.090542 - Ishan: Created file file2.txt
+2026-03-26 12:31:49.797340 - Ishan: Executed 'pwd'
+2026-03-26 12:31:58.319740 - Ishan: Executed 'tree'
+2026-03-26 12:41:48.302301 - admin: User logged out
+2026-03-26 12:42:12.746216 - Ishan: Executed 'ls'
+2026-03-26 12:43:01.850059 - admin: Executed 'pwd'
+2026-03-26 12:43:03.988607 - admin: Executed 'tree'
+2026-03-26 12:43:18.473084 - admin: Moved into directory HelloWorld
+2026-03-26 12:43:22.311978 - admin: Executed 'tree'
+2026-03-26 12:44:24.587152 - admin: Deleted file Filenew.txt
+2026-03-26 12:46:26.083585 - admin: Auto-logged out due to inactivity
+2026-03-26 12:46:34.371429 - admin: User logged out
