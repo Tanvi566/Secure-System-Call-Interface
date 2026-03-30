@@ -36,10 +36,11 @@ def register_user():
     try:
         with open("users.txt", "r") as f:
             for line in f:
-                u, _ = line.strip().split(",")
-                if u == username:
-                    result_label.configure(text="User already exists!", text_color="#ef4444")
-                    return
+                if line.strip():
+                    u, _ = line.strip().split(",")
+                    if u == username:
+                        result_label.configure(text="User already exists!", text_color="#ef4444")
+                        return
     except:
         pass
 
@@ -98,6 +99,7 @@ def open_dashboard(user):
     # ---- SYSTEM STATE ----
     current_dir = BASE_DIR
     role = "SUPERUSER" if user == "admin" else "USER"
+    cmd_history = [] 
 
     # ---- IDLE TIMER LOGIC ----
     last_activity = time.time()
@@ -152,11 +154,14 @@ def open_dashboard(user):
     ctk.CTkButton(user_frame, text="[→ Logout", width=80, height=30, fg_color="transparent", border_width=1, border_color="#ef4444", text_color="#ef4444", hover_color="#7f1d1d", command=logout).pack(side="left")
 
     # ---- LEFT SIDEBAR ----
-    sidebar = ctk.CTkFrame(dash, width=230, fg_color="#18181b", border_color="#27272a", border_width=1, corner_radius=0)
+    sidebar = ctk.CTkFrame(dash, width=240, fg_color="#18181b", border_color="#27272a", border_width=1, corner_radius=0)
     sidebar.pack(side="left", fill="y")
     sidebar.pack_propagate(False)
 
-    ctk.CTkLabel(sidebar, text="QUICK COMMANDS", font=("Roboto", 10, "bold"), text_color="#71717a").pack(anchor="w", padx=20, pady=(20, 10))
+    ctk.CTkLabel(sidebar, text="QUICK COMMANDS", font=("Roboto", 10, "bold"), text_color="#71717a").pack(anchor="w", padx=20, pady=(20, 5))
+
+    sidebar_scroll = ctk.CTkScrollableFrame(sidebar, fg_color="transparent", bg_color="transparent")
+    sidebar_scroll.pack(fill="both", expand=True, padx=5, pady=5)
 
     # ---- MAIN TERMINAL AREA ----
     main_area = ctk.CTkFrame(dash, fg_color="#09090b", corner_radius=0)
@@ -184,8 +189,9 @@ def open_dashboard(user):
     term_output.tag_config("cmd", foreground="#38bdf8")
     term_output.tag_config("success", foreground="#4ade80")
     term_output.tag_config("error", foreground="#ef4444")
+    term_output.tag_config("highlight", foreground="#a855f7") 
 
-    term_output.insert("end", f"Login successful at {datetime.now().strftime('%H:%M:%S')}\nType a command or use the sidebar shortcuts to interact with the file system.\n\n", "system")
+    term_output.insert("end", f"Ubuntu Linux Emulator 20.04 LTS\nLogin successful at {datetime.now().strftime('%H:%M:%S')}\nType 'help' to see a list of commands.\n\n", "system")
     term_output.configure(state="disabled")
 
     def print_to_term(cmd, msg, tag="success"):
@@ -201,14 +207,13 @@ def open_dashboard(user):
     def term_error(cmd, msg):
         print_to_term(cmd, f"Permission/System Error: {msg}", "error")
 
-    # ---- UPGRADED: LIVE COMMAND PROMPT BAR ----
+    # ---- LIVE COMMAND PROMPT BAR ----
     cmd_frame = ctk.CTkFrame(terminal_box, fg_color="#18181b", height=40, corner_radius=6)
     cmd_frame.pack(fill="x", padx=15, pady=(0, 15))
 
     prompt_label = ctk.CTkLabel(cmd_frame, text=f"[{user}@securesys ~]$", font=("Consolas", 13, "bold"), text_color="#38bdf8")
     prompt_label.pack(side="left", padx=(15, 10))
 
-    # FIXED: Added placeholder_text and placeholder_text_color here
     command_entry = ctk.CTkEntry(cmd_frame, font=("Consolas", 13), fg_color="#18181b", border_width=0, text_color="white", placeholder_text="Type command here...", placeholder_text_color="#52525b")
     command_entry.pack(side="left", fill="x", expand=True, padx=(0, 10))
 
@@ -223,6 +228,7 @@ def open_dashboard(user):
         command_entry.delete(0, 'end')
         if not cmd_str: return
 
+        cmd_history.append(cmd_str) 
         parts = cmd_str.split()
         cmd = parts[0].lower()
         args = parts[1:]
@@ -253,13 +259,39 @@ def open_dashboard(user):
             if len(args) >= 2: rename_file(args[0], args[1])
             elif len(args) == 1: rename_file(args[0]) 
             else: rename_file()
+        elif cmd == "cp":
+            if len(args) >= 2: copy_file(args[0], args[1])
+            elif len(args) == 1: copy_file(args[0])
+            else: copy_file()
+        elif cmd == "grep":
+            if len(args) >= 2: grep_file(args[0], args[1])
+            elif len(args) == 1: grep_file(search_term=args[0])
+            else: grep_file()
         elif cmd == "echo":
             if not args: write_file()
             else: write_file(args[0])
+        elif cmd == "wc":
+            if not args: word_count()
+            else: word_count(args[0])
+        elif cmd == "history": show_history()
+        elif cmd == "whoami": print_to_term("whoami", user, "success")
+        elif cmd == "date": show_date()
         elif cmd == "tail": view_logs()
         elif cmd == "uname": system_info()
         elif cmd == "passwd": change_password()
         elif cmd == "clear": clear_terminal()
+        elif cmd == "help": show_help()
+        elif cmd == "find":
+            if not args: find_file()
+            else: find_file(args[0])
+        elif cmd == "useradd":
+            if len(args) >= 2: add_user(args[0], args[1])
+            elif len(args) == 1: add_user(args[0])
+            else: add_user()
+        elif cmd == "userdel":
+            if not args: remove_user()
+            else: remove_user(args[0])
+        elif cmd == "users": list_users()  # <--- ADDED COMMAND HERE
         else:
             term_error(cmd, f"Command not found: {cmd}")
 
@@ -292,6 +324,158 @@ def open_dashboard(user):
         ctk.CTkButton(dialog, text="Save (Ctrl+S)", command=save, fg_color="#3b82f6", hover_color="#2563eb", font=("Consolas", 12)).pack(pady=10)
         dialog.wait_window()
         return result[0]
+
+    # -------- NEW FEATURE FUNCTIONS --------
+    def show_history():
+        if not cmd_history:
+            print_to_term("history", "No commands in history yet.", "system")
+            return
+        output = "\n".join([f" {i+1}  {cmd}" for i, cmd in enumerate(cmd_history)])
+        print_to_term("history", output, "system")
+
+    def show_date():
+        current_time = datetime.now().strftime("%a %b %d %H:%M:%S %Y")
+        print_to_term("date", current_time, "success")
+
+    def show_help():
+        help_text = (
+            "Available Commands:\n"
+            "  ls        - List directory contents\n"
+            "  pwd       - Print working directory\n"
+            "  tree      - Display directory structure\n"
+            "  cd        - Change directory\n"
+            "  touch     - Create a new file\n"
+            "  cat       - Read file contents\n"
+            "  echo      - Write to a file\n"
+            "  mv        - Move or rename a file/folder\n"
+            "  cp        - Copy a file\n"
+            "  mkdir     - Create a new directory\n"
+            "  rm        - Delete a file (Admin)\n"
+            "  rmdir     - Delete a directory (Admin)\n"
+            "  find      - Search for a file anywhere\n"
+            "  grep      - Search for text inside a file\n"
+            "  wc        - Word and line count for a file\n"
+            "  history   - Show command history\n"
+            "  date      - Show system date/time\n"
+            "  whoami    - Show current logged in user\n"
+            "  useradd   - Create new user (Admin)\n"
+            "  userdel   - Delete a user (Admin)\n"
+            "  users     - List all users (Admin)\n"
+            "  tail      - View system logs\n"
+            "  uname     - Show system information\n"
+            "  passwd    - Change current password\n"
+            "  clear     - Clear terminal screen\n"
+            "  help      - Show this help message"
+        )
+        print_to_term("help", help_text, "system")
+
+    def find_file(target_name=None):
+        if not target_name:
+            target_name = ctk.CTkInputDialog(text="Enter filename to find:", title="find").get_input()
+        if target_name:
+            output = ""
+            for root_dir, dirs, files in os.walk(BASE_DIR):
+                if target_name in files or target_name in dirs:
+                    rel_path = os.path.relpath(os.path.join(root_dir, target_name), BASE_DIR)
+                    display_path = f"~/{rel_path.replace(os.sep, '/')}"
+                    output += f"{display_path}\n"
+            
+            if output:
+                print_to_term(f"find {target_name}", output.strip(), "success")
+            else:
+                print_to_term(f"find {target_name}", "No matches found.", "error")
+
+    # ---- ADMIN ONLY USER MANAGEMENT ----
+    def add_user(target_user=None, target_pass=None):
+        if user != "admin":
+            term_error("useradd", "Access Denied. Only 'admin' can create users.")
+            return
+            
+        if not target_user:
+            target_user = ctk.CTkInputDialog(text="Enter new username:", title="useradd").get_input()
+        if not target_user: return
+        
+        if not target_pass:
+            target_pass = ctk.CTkInputDialog(text=f"Enter password for {target_user}:", title="useradd").get_input()
+        if not target_pass: return
+
+        try:
+            with open("users.txt", "r") as f:
+                for line in f:
+                    if line.strip() and line.strip().split(",")[0] == target_user:
+                        term_error("useradd", f"User '{target_user}' already exists.")
+                        return
+        except: pass
+
+        with open("users.txt", "a") as f:
+            f.write(f"\n{target_user},{target_pass}")
+        log_action(user, f"Created new user '{target_user}'")
+        print_to_term(f"useradd {target_user}", f"User '{target_user}' created successfully.", "success")
+
+    def remove_user(target_user=None):
+        if user != "admin":
+            term_error("userdel", "Access Denied. Only 'admin' can delete users.")
+            return
+            
+        if not target_user:
+            target_user = ctk.CTkInputDialog(text="Enter username to delete:", title="userdel").get_input()
+        if not target_user: return
+        
+        if target_user == "admin":
+            term_error("userdel", "Security alert: Cannot delete the primary admin account.")
+            return
+
+        try:
+            with open("users.txt", "r") as f:
+                lines = f.readlines()
+                
+            new_lines = []
+            found = False
+            for line in lines:
+                if line.strip() and line.strip().split(",")[0] == target_user:
+                    found = True
+                else:
+                    new_lines.append(line)
+
+            if found:
+                with open("users.txt", "w") as f:
+                    f.writelines(new_lines)
+                log_action(user, f"Deleted user '{target_user}'")
+                print_to_term(f"userdel {target_user}", f"User '{target_user}' deleted successfully.", "success")
+            else:
+                term_error(f"userdel {target_user}", f"User '{target_user}' not found.")
+        except Exception as e:
+            term_error("userdel", str(e))
+
+    # ---- NEW COMMAND: LIST ALL USERS ----
+    def list_users():
+        if user != "admin":
+            term_error("users", "Access Denied. Only 'admin' can view the user list.")
+            return
+        
+        try:
+            if not os.path.exists("users.txt"):
+                print_to_term("users", "No users found in the system.", "system")
+                return
+                
+            with open("users.txt", "r") as f:
+                lines = f.readlines()
+                
+            user_list = []
+            for line in lines:
+                if line.strip():
+                    u_name = line.strip().split(",")[0]
+                    user_list.append(f" 👤 {u_name}")
+                    
+            if user_list:
+                output = "Registered System Users:\n" + "\n".join(user_list)
+                print_to_term("users", output, "system")
+            else:
+                print_to_term("users", "No users found.", "system")
+                
+            log_action(user, "Viewed system user list")
+        except Exception as e:
+            term_error("users", str(e))
 
     # -------- DIRECTORY NAVIGATION --------
     def print_working_dir():
@@ -449,6 +633,62 @@ def open_dashboard(user):
                 except Exception as e:
                     term_error(f"mv {old_name} {new_name}", str(e))
 
+    def copy_file(src=None, dest=None):
+        if not src:
+            src = ctk.CTkInputDialog(text="Enter source file to copy:", title="cp").get_input()
+        if src:
+            if not dest:
+                dest = ctk.CTkInputDialog(text="Enter destination name:", title="cp").get_input()
+            if dest:
+                try:
+                    src_path = get_safe_path(src, current_dir)
+                    dest_path = get_safe_path(dest, current_dir)
+                    shutil.copy2(src_path, dest_path)
+                    log_action(user, f"Copied {src} to {dest}")
+                    print_to_term(f"cp {src} {dest}", "File copied successfully.", "success")
+                except Exception as e:
+                    term_error(f"cp {src} {dest}", str(e))
+
+    def grep_file(search_term=None, filename=None):
+        if not search_term:
+            search_term = ctk.CTkInputDialog(text="Enter word to search for:", title="grep").get_input()
+        if search_term:
+            if not filename:
+                filename = ctk.CTkInputDialog(text="Enter filename to search in:", title="grep").get_input()
+            if filename:
+                try:
+                    target_path = get_safe_path(filename, current_dir)
+                    with open(target_path, 'r') as f:
+                        lines = f.readlines()
+                    
+                    output = ""
+                    for i, line in enumerate(lines):
+                        if search_term in line:
+                            output += f"Line {i+1}: {line.strip()}\n"
+                    
+                    if output == "": output = "No matches found."
+                    print_to_term(f"grep '{search_term}' {filename}", output.strip(), "highlight")
+                except Exception as e:
+                    term_error(f"grep '{search_term}' {filename}", str(e))
+
+    def word_count(filename=None):
+        if not filename:
+            filename = ctk.CTkInputDialog(text="Enter filename for word count:", title="wc").get_input()
+        if filename:
+            try:
+                target_path = get_safe_path(filename, current_dir)
+                with open(target_path, 'r') as f:
+                    text = f.read()
+                
+                lines = len(text.splitlines())
+                words = len(text.split())
+                chars = len(text)
+                
+                output = f" Lines: {lines}\n Words: {words}\n Chars: {chars}\n File:  {filename}"
+                print_to_term(f"wc {filename}", output, "success")
+            except Exception as e:
+                term_error(f"wc {filename}", str(e))
+
     def create_folder(name=None):
         nonlocal current_dir
         if not name:
@@ -560,30 +800,38 @@ def open_dashboard(user):
 
     # -------- SIDEBAR BUTTONS --------
     buttons = [
+        ("❓ help (Cmd List)", show_help),
+        ("📅 date (Show Time)", show_date),
+        ("📜 history (Cmd Log)", show_history),
+        ("🔍 find (Search Files)", find_file),
+        ("📍 pwd (Print Dir)", print_working_dir), 
         ("📄 ls (List Files)", list_files),
         ("🌳 tree (Show Tree)", show_tree),        
-        ("📍 pwd (Print Dir)", print_working_dir), 
         ("📁 cd (Enter Dir)", change_dir),
         ("🔙 cd .. (Go Up)", go_up_dir),
+        ("📁 mkdir (New Dir)", create_folder),
         ("📝 touch (Create File)", create_file),
         ("🐱 cat (Read File)", read_file),
         ("📉 echo (Write File)", write_file),
-        ("📥 mv (Rename File)", rename_file), 
-        ("📁 mkdir (New Dir)", create_folder),
+        ("📥 mv (Rename/Move)", rename_file), 
+        ("📋 cp (Copy File)", copy_file),         
+        ("🔍 grep (Search File)", grep_file),     
         ("✂️ rm (Del File)", delete_file),     
         ("✂️ rmdir (Del Dir)", delete_folder),  
-        ("📜 tail (Logs)", view_logs),
+        ("👤 useradd (New User)", add_user),      
+        ("🚫 userdel (Del User)", remove_user),   
+        ("👥 users (List Users)", list_users),    # <--- NEW ADMIN BUTTON
+        ("📓 tail (System Logs)", view_logs),
         ("💻 uname (Sys Info)", system_info),
         ("🔑 passwd (Change Pass)", change_password),
     ]
 
     for text, cmd in buttons:
-        btn = ctk.CTkButton(master=sidebar, text=text, command=cmd, 
+        btn = ctk.CTkButton(master=sidebar_scroll, text=text, command=cmd, 
                             fg_color="transparent", hover_color="#27272a", anchor="w",
-                            text_color="#d4d4d8", width=190, height=26, corner_radius=6, font=("Consolas", 12))
-        btn.pack(pady=2, padx=20)
+                            text_color="#d4d4d8", height=26, corner_radius=6, font=("Consolas", 12))
+        btn.pack(fill="x", pady=2, padx=10)
         
-    # FIXED: Added a slight delay to ensure the window is drawn before snapping focus
     dash.after(200, command_entry.focus)
 
 

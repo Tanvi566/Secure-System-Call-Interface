@@ -64,3 +64,9 @@
 2026-03-30 15:06:17.018022 - Ishan: Executed 'pwd'
 2026-03-30 15:06:36.696526 - Ishan: Executed 'ls'
 2026-03-30 15:06:42.953219 - Ishan: Executed 'tree'
+2026-03-30 15:33:05.591759 - Ishan: User logged out
+2026-03-30 15:36:54.805173 - Ishan: User logged out
+2026-03-30 15:37:15.146528 - admin: Viewed system user list
+2026-03-30 15:37:29.050236 - admin: Executed 'pwd'
+2026-03-30 15:38:02.294147 - admin: Deleted user 'Meenakshi'
+2026-03-30 15:38:41.065076 - admin: Executed 'tree'

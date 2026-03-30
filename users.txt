@@ -2,6 +2,5 @@ Ishan,8064
 user,pass
 Chhavi,11084
 user,pass
-Meenakshi,3583
 NEW USER,NEW
 admin,8064
