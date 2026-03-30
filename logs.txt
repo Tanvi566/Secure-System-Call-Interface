@@ -55,3 +55,12 @@
 2026-03-26 12:44:24.587152 - admin: Deleted file Filenew.txt
 2026-03-26 12:46:26.083585 - admin: Auto-logged out due to inactivity
 2026-03-26 12:46:34.371429 - admin: User logged out
+2026-03-30 14:49:16.312678 - Ishan: Executed 'pwd'
+2026-03-30 14:49:41.861686 - Ishan: Executed 'pwd'
+2026-03-30 14:49:45.551041 - Ishan: User logged out
+2026-03-30 14:55:54.918174 - Ishan: Auto-logged out due to inactivity
+2026-03-30 14:56:25.122900 - Ishan: User logged out
+2026-03-30 15:00:01.430898 - Ishan: Auto-logged out due to inactivity
+2026-03-30 15:06:17.018022 - Ishan: Executed 'pwd'
+2026-03-30 15:06:36.696526 - Ishan: Executed 'ls'
+2026-03-30 15:06:42.953219 - Ishan: Executed 'tree'

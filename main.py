@@ -88,7 +88,7 @@ def open_dashboard(user):
 
     dash = ctk.CTkToplevel(root)
     dash.title("SecureSys - Terminal")
-    dash.geometry("1100x750") # Slightly taller to fit the new button
+    dash.geometry("1100x750")
     dash.configure(fg_color="#09090b") 
 
     def on_closing():
@@ -167,11 +167,18 @@ def open_dashboard(user):
 
     win_controls = ctk.CTkFrame(terminal_box, fg_color="transparent", height=30)
     win_controls.pack(fill="x", padx=15, pady=10)
-    ctk.CTkLabel(win_controls, text="🔴 🟡 🟢", font=("Arial", 14)).pack(side="left")
+    
+    dot_frame = ctk.CTkFrame(win_controls, fg_color="transparent")
+    dot_frame.pack(side="left")
+    
+    ctk.CTkFrame(dot_frame, width=12, height=12, corner_radius=6, fg_color="#ef4444").pack(side="left", padx=4) 
+    ctk.CTkFrame(dot_frame, width=12, height=12, corner_radius=6, fg_color="#4ade80").pack(side="left", padx=4) 
+    ctk.CTkFrame(dot_frame, width=12, height=12, corner_radius=6, fg_color="#3b82f6").pack(side="left", padx=4) 
+
     ctk.CTkLabel(win_controls, text="Terminal — System Shell", font=("Consolas", 12), text_color="#52525b").pack(side="left", padx=15)
 
     term_output = ctk.CTkTextbox(terminal_box, font=("Consolas", 13), fg_color="transparent", text_color="#d4d4d8", wrap="word", border_width=0)
-    term_output.pack(fill="both", expand=True, padx=15, pady=(0, 15))
+    term_output.pack(fill="both", expand=True, padx=15, pady=(0, 5))
 
     term_output.tag_config("system", foreground="#f59e0b")
     term_output.tag_config("cmd", foreground="#38bdf8")
@@ -193,6 +200,75 @@ def open_dashboard(user):
 
     def term_error(cmd, msg):
         print_to_term(cmd, f"Permission/System Error: {msg}", "error")
+
+    # ---- UPGRADED: LIVE COMMAND PROMPT BAR ----
+    cmd_frame = ctk.CTkFrame(terminal_box, fg_color="#18181b", height=40, corner_radius=6)
+    cmd_frame.pack(fill="x", padx=15, pady=(0, 15))
+
+    prompt_label = ctk.CTkLabel(cmd_frame, text=f"[{user}@securesys ~]$", font=("Consolas", 13, "bold"), text_color="#38bdf8")
+    prompt_label.pack(side="left", padx=(15, 10))
+
+    # FIXED: Added placeholder_text and placeholder_text_color here
+    command_entry = ctk.CTkEntry(cmd_frame, font=("Consolas", 13), fg_color="#18181b", border_width=0, text_color="white", placeholder_text="Type command here...", placeholder_text_color="#52525b")
+    command_entry.pack(side="left", fill="x", expand=True, padx=(0, 10))
+
+    def update_prompt_label():
+        rel_path = os.path.relpath(current_dir, BASE_DIR)
+        display_path = "~" if rel_path == "." else f"~/{rel_path.replace(os.sep, '/')}"
+        prompt_label.configure(text=f"[{user}@securesys {display_path}]$")
+
+    # ---- COMMAND PARSER ----
+    def process_command(event=None):
+        cmd_str = command_entry.get().strip()
+        command_entry.delete(0, 'end')
+        if not cmd_str: return
+
+        parts = cmd_str.split()
+        cmd = parts[0].lower()
+        args = parts[1:]
+
+        if cmd == "ls": list_files()
+        elif cmd == "pwd": print_working_dir()
+        elif cmd == "tree": show_tree()
+        elif cmd == "cd":
+            if not args: change_dir()
+            elif args[0] == "..": go_up_dir()
+            else: change_dir(args[0])
+        elif cmd == "touch":
+            if not args: create_file()
+            else: create_file(args[0])
+        elif cmd == "cat":
+            if not args: read_file()
+            else: read_file(args[0])
+        elif cmd == "mkdir":
+            if not args: create_folder()
+            else: create_folder(args[0])
+        elif cmd == "rm":
+            if not args: delete_file()
+            else: delete_file(args[0])
+        elif cmd == "rmdir":
+            if not args: delete_folder()
+            else: delete_folder(args[0])
+        elif cmd == "mv":
+            if len(args) >= 2: rename_file(args[0], args[1])
+            elif len(args) == 1: rename_file(args[0]) 
+            else: rename_file()
+        elif cmd == "echo":
+            if not args: write_file()
+            else: write_file(args[0])
+        elif cmd == "tail": view_logs()
+        elif cmd == "uname": system_info()
+        elif cmd == "passwd": change_password()
+        elif cmd == "clear": clear_terminal()
+        else:
+            term_error(cmd, f"Command not found: {cmd}")
+
+    command_entry.bind("<Return>", process_command)
+
+    def clear_terminal():
+        term_output.configure(state="normal")
+        term_output.delete("0.0", "end")
+        term_output.configure(state="disabled")
 
     # -----------------------------------------------
     def ask_large_content(title_text):
@@ -222,9 +298,10 @@ def open_dashboard(user):
         log_action(user, "Executed 'pwd'")
         print_to_term("pwd", current_dir, "success")
 
-    def change_dir():
+    def change_dir(name=None):
         nonlocal current_dir
-        name = ctk.CTkInputDialog(text="Enter folder name to enter:", title="cd").get_input()
+        if not name:
+            name = ctk.CTkInputDialog(text="Enter folder name to enter:", title="cd").get_input()
         if name:
             try:
                 target = get_safe_path(name, current_dir)
@@ -232,6 +309,7 @@ def open_dashboard(user):
                     current_dir = target
                     log_action(user, f"Moved into directory {name}")
                     print_to_term(f"cd {name}", f"Changed directory.", "success")
+                    update_prompt_label()
                 else:
                     term_error(f"cd {name}", "Not a valid directory.")
             except Exception as e:
@@ -247,6 +325,7 @@ def open_dashboard(user):
             target = get_safe_path("..", current_dir)
             current_dir = target
             print_to_term("cd ..", "Moved up one directory level.", "success")
+            update_prompt_label()
         except Exception as e:
             term_error("cd ..", str(e))
 
@@ -269,17 +348,13 @@ def open_dashboard(user):
         except Exception as e:
             term_error("ls -l", str(e))
 
-    # ---- NEW TREE FUNCTION ----
     def show_tree():
         try:
             log_action(user, "Executed 'tree'")
-            
-            # Start the output with the name of the current folder
             folder_name = os.path.basename(current_dir)
             if not folder_name: folder_name = "project_files"
             tree_output = f"{folder_name}/\n"
             
-            # Recursive function to build the tree drawing
             def build_tree(path, prefix=""):
                 output = ""
                 try:
@@ -298,7 +373,6 @@ def open_dashboard(user):
                         output += f"{prefix}├── {item}\n"
                         new_prefix = prefix + "│   "
                         
-                    # If it's a folder, dive inside it!
                     if os.path.isdir(item_path):
                         output += build_tree(item_path, new_prefix)
                 return output
@@ -311,10 +385,10 @@ def open_dashboard(user):
             print_to_term("tree", tree_output.rstrip(), "success")
         except Exception as e:
             term_error("tree", str(e))
-    # ---------------------------
 
-    def create_file():
-        name = ctk.CTkInputDialog(text="Enter filename:", title="touch").get_input()
+    def create_file(name=None):
+        if not name:
+            name = ctk.CTkInputDialog(text="Enter filename:", title="touch").get_input()
         if name:
             try:
                 open(get_safe_path(name, current_dir), "x").close()
@@ -323,8 +397,9 @@ def open_dashboard(user):
             except Exception as e:
                 term_error(f"touch {name}", str(e))
 
-    def read_file():
-        name = ctk.CTkInputDialog(text="Enter filename:", title="cat").get_input()
+    def read_file(name=None):
+        if not name:
+            name = ctk.CTkInputDialog(text="Enter filename:", title="cat").get_input()
         if name:
             try:
                 content = open(get_safe_path(name, current_dir)).read()
@@ -345,8 +420,9 @@ def open_dashboard(user):
             except Exception as e:
                 term_error(f"cat {name}", str(e))
 
-    def write_file():
-        name = ctk.CTkInputDialog(text="Enter filename:", title="echo").get_input()
+    def write_file(name=None):
+        if not name:
+            name = ctk.CTkInputDialog(text="Enter filename:", title="echo").get_input()
         if name:
             content = ask_large_content(f"echo > {name}") 
             if content is not None:
@@ -357,10 +433,12 @@ def open_dashboard(user):
                 except Exception as e:
                     term_error(f"echo > {name}", str(e))
 
-    def rename_file():
-        old_name = ctk.CTkInputDialog(text="Enter current filename:", title="mv (Rename)").get_input()
+    def rename_file(old_name=None, new_name=None):
+        if not old_name:
+            old_name = ctk.CTkInputDialog(text="Enter current filename:", title="mv (Rename)").get_input()
         if old_name:
-            new_name = ctk.CTkInputDialog(text="Enter NEW filename:", title="mv (Rename)").get_input()
+            if not new_name:
+                new_name = ctk.CTkInputDialog(text="Enter NEW filename:", title="mv (Rename)").get_input()
             if new_name:
                 try:
                     old_path = get_safe_path(old_name, current_dir)
@@ -371,26 +449,29 @@ def open_dashboard(user):
                 except Exception as e:
                     term_error(f"mv {old_name} {new_name}", str(e))
 
-    def create_folder():
+    def create_folder(name=None):
         nonlocal current_dir
-        name = ctk.CTkInputDialog(text="Enter folder name:", title="mkdir").get_input()
+        if not name:
+            name = ctk.CTkInputDialog(text="Enter folder name:", title="mkdir").get_input()
         if name:
             try:
                 new_path = get_safe_path(name, current_dir)
                 os.makedirs(new_path)
                 log_action(user, f"Created folder {name}")
                 current_dir = new_path
+                update_prompt_label()
                 print_to_term(f"mkdir {name}", f"Directory created.\nAutomatically moved into ~/{name}.", "success")
             except Exception as e:
                 term_error(f"mkdir {name}", str(e))
 
     # ---- ADMIN ONLY DELETE FUNCTIONS ----
-    def delete_file():
+    def delete_file(name=None):
         if user != "admin":
             term_error("rm", "Access Denied. Only 'admin' has delete privileges.")
             return
 
-        name = ctk.CTkInputDialog(text="Enter filename to delete:", title="rm").get_input()
+        if not name:
+            name = ctk.CTkInputDialog(text="Enter filename to delete:", title="rm").get_input()
         if name:
             try:
                 target_path = get_safe_path(name, current_dir)
@@ -403,12 +484,13 @@ def open_dashboard(user):
             except Exception as e:
                 term_error(f"rm {name}", str(e))
 
-    def delete_folder():
+    def delete_folder(name=None):
         if user != "admin":
             term_error("rmdir", "Access Denied. Only 'admin' has delete privileges.")
             return
 
-        name = ctk.CTkInputDialog(text="Enter folder to delete:", title="rmdir").get_input()
+        if not name:
+            name = ctk.CTkInputDialog(text="Enter folder to delete:", title="rmdir").get_input()
         if name:
             try:
                 target_path = get_safe_path(name, current_dir)
@@ -479,7 +561,7 @@ def open_dashboard(user):
     # -------- SIDEBAR BUTTONS --------
     buttons = [
         ("📄 ls (List Files)", list_files),
-        ("🌳 tree (Show Tree)", show_tree),        # <--- NEW TREE BUTTON
+        ("🌳 tree (Show Tree)", show_tree),        
         ("📍 pwd (Print Dir)", print_working_dir), 
         ("📁 cd (Enter Dir)", change_dir),
         ("🔙 cd .. (Go Up)", go_up_dir),
@@ -500,6 +582,9 @@ def open_dashboard(user):
                             fg_color="transparent", hover_color="#27272a", anchor="w",
                             text_color="#d4d4d8", width=190, height=26, corner_radius=6, font=("Consolas", 12))
         btn.pack(pady=2, padx=20)
+        
+    # FIXED: Added a slight delay to ensure the window is drawn before snapping focus
+    dash.after(200, command_entry.focus)
 
 
 # ---------------- LOGIN UI ----------------
