@@ -6,3 +6,4 @@ NEW USER,NEW
 admin,8064
 Riddhima,123
 user,pass
+Chandan, 9876
