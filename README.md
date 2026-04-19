@@ -210,21 +210,21 @@ Examples:
 ## ⚙️ Configuration
 
 ### Timeout Settings
-- **Idle Timeout** - 120 seconds (2 minutes)
-- **Login Attempts** - 5 attempts before system lock
+- **Idle Timeout** - 120 seconds (2 minutes).
+- **Login Attempts** - 5 attempts before system lock.
 
 ### Theme
-- **Appearance** - Dark mode
-- **Color Scheme** - Blue primary theme
-- **Font** - Consolas for terminal, Roboto for UI
+- **Appearance** - Dark mode.
+- **Color Scheme** - Blue primary theme.
+- **Font** - Consolas for terminal, Roboto for UI.
 
 ## 🐛 Limitations & Notes
 
-1. **Single-User Sessions** - Only one user can be logged in at a time
-2. **Plain Text Storage** - User data stored in plain text files (not encrypted)
-3. **No Network Features** - Operates locally only
-4. **No Command Chaining** - Commands must be executed individually
-5. **No Script Execution** - Cannot execute bash scripts or system binaries
+1. **Single-User Sessions** - Only one user can be logged in at a time.
+2. **Plain Text Storage** - User data stored in plain text files (not encrypted).
+3. **No Network Features** - Operates locally only.
+4. **No Command Chaining** - Commands must be executed individually.
+5. **No Script Execution** - Cannot execute bash scripts or system binaries.
 
 ## 📄 License
 
