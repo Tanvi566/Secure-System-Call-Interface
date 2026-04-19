@@ -70,3 +70,17 @@
 2026-03-30 15:37:29.050236 - admin: Executed 'pwd'
 2026-03-30 15:38:02.294147 - admin: Deleted user 'Meenakshi'
 2026-03-30 15:38:41.065076 - admin: Executed 'tree'
+2026-04-14 11:24:52.061075 - Riddhima: Executed 'pwd'
+2026-04-14 11:25:24.080180 - Riddhima: Created folder testfolder
+2026-04-14 11:26:13.072033 - Riddhima: Created file file1.txt
+2026-04-14 11:26:20.133531 - Riddhima: Executed 'ls'
+2026-04-14 11:27:08.125751 - Riddhima: Wrote file file1.txt
+2026-04-14 11:27:27.291267 - Riddhima: Read file file1.txt
+2026-04-14 11:31:24.888219 - Riddhima: User logged out
+2026-04-14 11:31:58.810630 - admin: Created new user 'user1'
+2026-04-14 11:32:19.345561 - admin: Viewed system user list
+2026-04-14 11:33:02.940656 - admin: Deleted file file1.txt
+2026-04-15 10:32:35.080577 - Riddhima: Executed 'pwd'
+2026-04-15 10:34:39.455890 - Riddhima: Auto-logged out due to inactivity
+2026-04-15 11:01:01.517707 - Riddhima: User logged out
+2026-04-15 11:17:16.127220 - Riddhima: Auto-logged out due to inactivity
